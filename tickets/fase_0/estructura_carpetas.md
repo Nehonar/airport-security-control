@@ -1,0 +1,23 @@
+/src
+  /core
+    Game.js
+    GameLoop.js
+    Time.js
+  /camera
+    Camera.js
+  /zones
+    Zone.js
+    ZoneManager.js
+  /entities
+    Player.js
+  /systems
+    InputSystem.js
+    MovementSystem.js
+  /render
+    Renderer.js
+  /utils
+    Vector2.js
+    Constants.js
+
+index.html
+main.js
