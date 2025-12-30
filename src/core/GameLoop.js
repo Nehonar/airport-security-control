@@ -25,8 +25,10 @@ export default class GameLoop {
   step(timestamp) {
     if (!this.running) return;
 
-    const delta = this.time.update(timestamp);
-    this.update(delta);
+    this.time.update(timestamp);
+    const deltaSeconds = this.time.deltaSeconds;
+
+    this.update(deltaSeconds);
     this.render();
 
     this.frameRequest = requestAnimationFrame(this.step);

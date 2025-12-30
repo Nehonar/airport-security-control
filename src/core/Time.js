@@ -1,8 +1,9 @@
 export default class Time {
-  constructor() {
+  constructor({ maxDeltaMs = 100 } = {}) {
+    this.maxDeltaMs = maxDeltaMs;
     this.lastTimestamp = 0;
-    this.delta = 0;
-    this.elapsed = 0;
+    this.deltaMs = 0;
+    this.elapsedMs = 0;
     this.started = false;
   }
 
@@ -10,13 +11,23 @@ export default class Time {
     if (!this.started) {
       this.started = true;
       this.lastTimestamp = timestamp;
-      this.delta = 0;
-      return this.delta;
+      this.deltaMs = 0;
+      return this.deltaMs;
     }
 
-    this.delta = timestamp - this.lastTimestamp;
+    const rawDelta = timestamp - this.lastTimestamp;
     this.lastTimestamp = timestamp;
-    this.elapsed += this.delta;
-    return this.delta;
+
+    this.deltaMs = Math.min(rawDelta, this.maxDeltaMs);
+    this.elapsedMs += this.deltaMs;
+    return this.deltaMs;
+  }
+
+  get deltaSeconds() {
+    return this.deltaMs / 1000;
+  }
+
+  get elapsedSeconds() {
+    return this.elapsedMs / 1000;
   }
 }

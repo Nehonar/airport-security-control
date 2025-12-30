@@ -10,8 +10,8 @@ export default class Game {
     this.renderer = new Renderer(canvas);
 
     this.state = {
-      elapsed: 0,
-      duration: GAME_DURATION_MS,
+      elapsedMs: 0,
+      durationMs: GAME_DURATION_MS,
     };
 
     this.loop = new GameLoop({
@@ -29,8 +29,12 @@ export default class Game {
     this.loop.stop();
   }
 
-  update(delta) {
-    this.state.elapsed = Math.min(this.state.elapsed + delta, this.state.duration);
+  update(deltaSeconds) {
+    const deltaMs = deltaSeconds * 1000;
+    this.state.elapsedMs = Math.min(
+      this.state.elapsedMs + deltaMs,
+      this.state.durationMs,
+    );
   }
 
   render() {

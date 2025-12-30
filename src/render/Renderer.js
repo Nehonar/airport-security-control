@@ -40,7 +40,7 @@ export default class Renderer {
 
   drawHUD(state) {
     const { ctx, canvas } = this;
-    const remaining = Math.max(0, state.duration - state.elapsed);
+    const remaining = Math.max(0, state.durationMs - state.elapsedMs);
     const seconds = Math.ceil(remaining / 1000);
 
     ctx.fillStyle = COLORS.hud;
