@@ -12,3 +12,6 @@ window.addEventListener('resize', resizeCanvas);
 const game = new Game({ canvas });
 resizeCanvas();
 game.start();
+
+// Debug helper to test interaction modes and clock speeds from console.
+window.game = game;

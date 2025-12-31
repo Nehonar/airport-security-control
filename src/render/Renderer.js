@@ -16,6 +16,7 @@ export default class Renderer {
     this.ctx.save();
     this.applyCamera(state.camera);
     this.drawZones(state.zones, state.activeZoneId);
+    this.drawInteractionArea(state.interactionArea, state.canInspect);
     this.drawPlayer(state.player);
     this.ctx.restore();
     this.drawHUD(state);
@@ -52,6 +53,7 @@ export default class Renderer {
     const { ctx, canvas } = this;
     const remaining = Math.max(0, state.durationMs - state.elapsedMs);
     const seconds = Math.ceil(remaining / 1000);
+    const clock = state.clock ?? { time: '--:--', mode: 'NORMAL', multiplier: 1 };
 
     ctx.fillStyle = COLORS.hud;
     ctx.fillRect(0, 0, canvas.width, 40);
@@ -59,6 +61,9 @@ export default class Renderer {
     ctx.fillStyle = COLORS.text;
     ctx.font = '14px "Segoe UI", sans-serif';
     ctx.fillText(`Tiempo restante: ${seconds}s`, 16, 24);
+
+    ctx.textAlign = 'center';
+    ctx.fillText(`Hora: ${clock.time} | Ritmo x${clock.multiplier.toFixed(2)} (${clock.mode === 'DOCUMENT_INSPECTION' ? 'INSPECCIÓN' : 'NORMAL'})`, canvas.width / 2, 24);
 
     ctx.textAlign = 'right';
     ctx.fillText('Bootstrap fase 0.1 activo', canvas.width - 16, 24);
@@ -78,5 +83,21 @@ export default class Renderer {
   applyCamera(camera) {
     if (!camera) return;
     this.ctx.translate(-camera.position.x, -camera.position.y);
+  }
+
+  drawInteractionArea(area, canInspect) {
+    if (!area) return;
+    const { ctx } = this;
+    ctx.save();
+    ctx.strokeStyle = canInspect ? '#44bba4' : '#e26d5c';
+    ctx.fillStyle = canInspect ? 'rgba(68, 187, 164, 0.08)' : 'rgba(226, 109, 92, 0.05)';
+    ctx.lineWidth = canInspect ? 3 : 2;
+    ctx.fillRect(area.x, area.y, area.width, area.height);
+    ctx.strokeRect(area.x, area.y, area.width, area.height);
+
+    ctx.fillStyle = ctx.strokeStyle;
+    ctx.font = '13px "Segoe UI", sans-serif';
+    ctx.fillText(canInspect ? 'Puedes inspeccionar' : 'Acércate al puesto', area.x + 8, area.y + 18);
+    ctx.restore();
   }
 }

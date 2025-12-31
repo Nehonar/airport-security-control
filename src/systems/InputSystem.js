@@ -9,6 +9,12 @@ const KEY_MAP = {
   KeyS: 'down',
   KeyA: 'left',
   KeyD: 'right',
+  KeyE: 'interact',
+  Space: 'interact',
+  Enter: 'interact',
+  Escape: 'cancel',
+  KeyF: 'accept',
+  KeyR: 'reject',
 };
 
 export default class InputSystem {
@@ -17,6 +23,10 @@ export default class InputSystem {
     this.direction = new Vector2(0, 0);
     this.keys = new Set();
     this.target = target;
+    this.interactRequested = false;
+    this.cancelRequested = false;
+    this.acceptRequested = false;
+    this.rejectRequested = false;
 
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
@@ -28,13 +38,24 @@ export default class InputSystem {
   onKeyDown(event) {
     const dir = KEY_MAP[event.code];
     if (!dir) return;
-    this.keys.add(dir);
+    if (dir === 'interact') {
+      this.interactRequested = true;
+    } else if (dir === 'cancel') {
+      this.cancelRequested = true;
+    } else if (dir === 'accept') {
+      this.acceptRequested = true;
+    } else if (dir === 'reject') {
+      this.rejectRequested = true;
+    } else {
+      this.keys.add(dir);
+    }
     event.preventDefault();
   }
 
   onKeyUp(event) {
     const dir = KEY_MAP[event.code];
     if (!dir) return;
+    if (dir === 'interact' || dir === 'cancel' || dir === 'accept' || dir === 'reject') return;
     this.keys.delete(dir);
     event.preventDefault();
   }
@@ -55,5 +76,37 @@ export default class InputSystem {
     } else {
       this.direction.set(0, 0);
     }
+  }
+
+  consumeInteract() {
+    if (this.interactRequested) {
+      this.interactRequested = false;
+      return true;
+    }
+    return false;
+  }
+
+  consumeCancel() {
+    if (this.cancelRequested) {
+      this.cancelRequested = false;
+      return true;
+    }
+    return false;
+  }
+
+  consumeAccept() {
+    if (this.acceptRequested) {
+      this.acceptRequested = false;
+      return true;
+    }
+    return false;
+  }
+
+  consumeReject() {
+    if (this.rejectRequested) {
+      this.rejectRequested = false;
+      return true;
+    }
+    return false;
   }
 }
