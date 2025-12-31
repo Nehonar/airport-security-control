@@ -69,7 +69,7 @@ Entregable
 
 ZoneManager cambia zona activa (log en consola)
 
-🎫 Ticket 0.6 – Cámara discreta por zonas
+🎫 Ticket 0.6 – Cámara discreta por zonas^
 
 Objetivo
 

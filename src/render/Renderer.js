@@ -13,7 +13,11 @@ export default class Renderer {
 
   render(state) {
     this.clear();
-    this.drawZones();
+    this.ctx.save();
+    this.applyCamera(state.camera);
+    this.drawZones(state.zones, state.activeZoneId);
+    this.drawPlayer(state.player);
+    this.ctx.restore();
     this.drawHUD(state);
   }
 
@@ -22,19 +26,25 @@ export default class Renderer {
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  drawZones() {
-    const { ctx, canvas } = this;
-    const zoneWidth = canvas.width / 3;
+  drawZones(zones = [], activeZoneId = null) {
+    const { ctx } = this;
+    const accents = COLORS.accents;
 
-    COLORS.accents.forEach((color, index) => {
-      const x = index * zoneWidth;
+    zones.forEach((zone, index) => {
+      const color = accents[index % accents.length];
+      const { x, y, width, height } = zone.bounds;
+      const isActive = zone.id === activeZoneId;
       ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
-      ctx.strokeRect(x + 8, 60, zoneWidth - 16, canvas.height - 120);
+      ctx.lineWidth = isActive ? 3 : 2;
+      ctx.globalAlpha = isActive ? 0.18 : 0.12;
+      ctx.fillStyle = color;
+      ctx.fillRect(x + 8, y + 60, width - 16, height - 120);
+      ctx.globalAlpha = 1;
+      ctx.strokeRect(x + 8, y + 60, width - 16, height - 120);
 
       ctx.fillStyle = color;
       ctx.font = '16px "Segoe UI", sans-serif';
-      ctx.fillText(`Zona ${index + 1}`, x + 18, 48);
+      ctx.fillText(zone.name, x + 18, y + 48);
     });
   }
 
@@ -53,5 +63,20 @@ export default class Renderer {
     ctx.textAlign = 'right';
     ctx.fillText('Bootstrap fase 0.1 activo', canvas.width - 16, 24);
     ctx.textAlign = 'left';
+  }
+
+  drawPlayer(player) {
+    if (!player) return;
+    const { ctx } = this;
+    ctx.fillStyle = '#f4d35e';
+    ctx.strokeStyle = '#f6a821';
+    ctx.lineWidth = 2;
+    ctx.fillRect(player.position.x, player.position.y, player.size.x, player.size.y);
+    ctx.strokeRect(player.position.x, player.position.y, player.size.x, player.size.y);
+  }
+
+  applyCamera(camera) {
+    if (!camera) return;
+    this.ctx.translate(-camera.position.x, -camera.position.y);
   }
 }
