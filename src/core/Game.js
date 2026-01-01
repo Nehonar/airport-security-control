@@ -261,11 +261,18 @@ export default class Game {
           flights: this.flightScheduleSystem.flights,
         });
       } else {
+        // Incluso en rechazo manual, evaluamos validez para marcar al pasajero.
+        const evaluation = this.inspectionSystem.evaluateValidity(
+          currentPassenger,
+          this.flightScheduleSystem.flights,
+        );
+        // Marca decisión del jugador aunque sea incorrecta respecto a validez.
+        currentPassenger.passenger.decision = 'REJECTED';
         result = {
           decision: 'REJECTED',
           passengerName: currentPassenger.passenger.name,
           flightCode: currentPassenger.boardingPass.flightId,
-          reason: 'Rechazado manualmente',
+          reason: `Rechazado manualmente (${evaluation.reasonText})`,
         };
         this.inspectionSystem.lastResult = result;
         console.info(`[Inspection] REJECTED - ${result.passengerName} (${result.reason})`);
