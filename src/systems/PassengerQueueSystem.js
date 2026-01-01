@@ -1,6 +1,7 @@
 import Passenger from '../entities/Passenger.js';
 import BoardingPass from '../entities/BoardingPass.js';
 import Passport from '../entities/Passport.js';
+import Vector2 from '../utils/Vector2.js';
 
 const NAMES = [
   'Ana Torres',
@@ -16,23 +17,21 @@ const NAMES = [
 ];
 
 export default class PassengerQueueSystem {
-  constructor({ flights, queueSize = 5 }) {
+  constructor({
+    flights,
+    queueSize = 5,
+    maxSize = null,
+    spawnPosition = new Vector2(),
+  }) {
     this.flights = flights;
     this.queueSize = queueSize;
+    this.maxSize = maxSize ?? queueSize;
+    this.spawnPosition = spawnPosition instanceof Vector2 ? spawnPosition : new Vector2(spawnPosition.x, spawnPosition.y);
     this.queue = [];
     this.generatedCount = 0;
-    this.ensureQueue();
   }
 
-  update() {
-    this.ensureQueue();
-  }
-
-  ensureQueue() {
-    while (this.queue.length < this.queueSize) {
-      this.queue.push(this.createPassengerEntry());
-    }
-  }
+  update() {}
 
   createPassengerEntry() {
     const flight = this.pickFlight();
@@ -43,6 +42,7 @@ export default class PassengerQueueSystem {
       id,
       name: baseName,
       flightId: flight?.id ?? 'UNKNOWN',
+      position: this.spawnPosition.copy(),
     });
 
     // By default documents match passenger.
@@ -104,7 +104,6 @@ export default class PassengerQueueSystem {
 
   pop() {
     const passenger = this.queue.shift() ?? null;
-    this.ensureQueue();
     return passenger;
   }
 }

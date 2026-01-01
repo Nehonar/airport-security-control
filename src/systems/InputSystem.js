@@ -15,6 +15,7 @@ const KEY_MAP = {
   Escape: 'cancel',
   KeyF: 'accept',
   KeyR: 'reject',
+  KeyQ: 'toggleQueueDebug',
 };
 
 export default class InputSystem {
@@ -27,6 +28,7 @@ export default class InputSystem {
     this.cancelRequested = false;
     this.acceptRequested = false;
     this.rejectRequested = false;
+    this.toggleQueueDebugRequested = false;
 
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
@@ -46,6 +48,8 @@ export default class InputSystem {
       this.acceptRequested = true;
     } else if (dir === 'reject') {
       this.rejectRequested = true;
+    } else if (dir === 'toggleQueueDebug') {
+      this.toggleQueueDebugRequested = true;
     } else {
       this.keys.add(dir);
     }
@@ -105,6 +109,14 @@ export default class InputSystem {
   consumeReject() {
     if (this.rejectRequested) {
       this.rejectRequested = false;
+      return true;
+    }
+    return false;
+  }
+
+  consumeToggleQueueDebug() {
+    if (this.toggleQueueDebugRequested) {
+      this.toggleQueueDebugRequested = false;
       return true;
     }
     return false;

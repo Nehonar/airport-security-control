@@ -17,6 +17,11 @@ export default class Renderer {
     this.applyCamera(state.camera);
     this.drawZones(state.zones, state.activeZoneId);
     this.drawInteractionArea(state.interactionArea, state.canInspect);
+    if (state.debugQueue) {
+      this.drawQueueSlots(state.queueSlots);
+      this.drawQueuePassengers(state.queueSlots);
+      this.drawQueueDirections(state.queueSlots);
+    }
     this.drawPlayer(state.player);
     this.ctx.restore();
     this.drawHUD(state);
@@ -98,6 +103,85 @@ export default class Renderer {
     ctx.fillStyle = ctx.strokeStyle;
     ctx.font = '13px "Segoe UI", sans-serif';
     ctx.fillText(canInspect ? 'Puedes inspeccionar' : 'Acércate al puesto', area.x + 8, area.y + 18);
+    ctx.restore();
+  }
+
+  drawQueueSlots(queueSlots = []) {
+    if (!queueSlots.length) return;
+    const { ctx } = this;
+    ctx.save();
+    queueSlots.forEach((slot, index) => {
+      const isFront = index === queueSlots.length - 1;
+      ctx.strokeStyle = isFront ? '#aad4ff' : slot.occupiedBy ? '#e26d5c' : '#44bba4';
+      ctx.lineWidth = isFront ? 3 : 2;
+      const size = 38;
+      ctx.strokeRect(slot.position.x - size / 2, slot.position.y - size / 2, size, size);
+      ctx.fillStyle = 'rgba(255,255,255,0.04)';
+      ctx.fillRect(slot.position.x - size / 2, slot.position.y - size / 2, size, size);
+      ctx.fillStyle = isFront ? '#aad4ff' : '#c1c7d0';
+      ctx.font = '11px "Segoe UI", sans-serif';
+      ctx.fillText(`#${index}`, slot.position.x - 10, slot.position.y - size / 2 - 4);
+      if (slot.occupiedBy) {
+        ctx.fillStyle = '#e26d5c';
+        ctx.font = '12px "Segoe UI", sans-serif';
+        ctx.fillText('X', slot.position.x - 3, slot.position.y + 4);
+      }
+    });
+    ctx.restore();
+  }
+
+  drawQueuePassengers(queueSlots = []) {
+    if (!queueSlots.length) return;
+    const { ctx } = this;
+    ctx.save();
+    queueSlots.forEach((slot) => {
+      const passenger = slot.occupiedBy;
+      if (!passenger) return;
+      ctx.fillStyle = '#9ad5ff';
+      ctx.strokeStyle = '#1f3b5d';
+      ctx.lineWidth = 2;
+      const w = 24;
+      const h = 32;
+      ctx.fillRect(passenger.position.x - w / 2, passenger.position.y - h / 2, w, h);
+      ctx.strokeRect(passenger.position.x - w / 2, passenger.position.y - h / 2, w, h);
+    });
+    ctx.restore();
+  }
+
+  drawQueueDirections(queueSlots = []) {
+    if (queueSlots.length < 2) return;
+    const { ctx } = this;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i < queueSlots.length - 1; i += 1) {
+      const a = queueSlots[i].position;
+      const b = queueSlots[i + 1].position;
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+    }
+    ctx.stroke();
+    // Flecha hacia el control: desde el slot lejano (0) al cercano (último).
+    const front = queueSlots[queueSlots.length - 1]?.position;
+    const back = queueSlots[0]?.position;
+    if (front && back) {
+      ctx.strokeStyle = '#aad4ff';
+      ctx.fillStyle = '#aad4ff';
+      ctx.beginPath();
+      ctx.moveTo(back.x, back.y);
+      ctx.lineTo(front.x, front.y);
+      ctx.stroke();
+      // Pequeña punta de flecha cerca del frente
+      const angle = Math.atan2(front.y - back.y, front.x - back.x);
+      const size = 8;
+      ctx.beginPath();
+      ctx.moveTo(front.x, front.y);
+      ctx.lineTo(front.x - size * Math.cos(angle - Math.PI / 6), front.y - size * Math.sin(angle - Math.PI / 6));
+      ctx.lineTo(front.x - size * Math.cos(angle + Math.PI / 6), front.y - size * Math.sin(angle + Math.PI / 6));
+      ctx.closePath();
+      ctx.fill();
+    }
     ctx.restore();
   }
 }
