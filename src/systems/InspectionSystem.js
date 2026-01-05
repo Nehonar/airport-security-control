@@ -58,7 +58,11 @@ export default class InspectionSystem {
     } else if (flight.status === 'CANCELLED') {
       isValid = false;
       invalidReason = InvalidReason.FLIGHT_CANCELLED;
-    } else if (boardingPass.passengerName !== passport.passengerName) {
+    } else if (
+      boardingPass.passengerName !== passport.passengerName ||
+      passenger.name !== boardingPass.passengerName ||
+      passenger.name !== passport.passengerName
+    ) {
       isValid = false;
       invalidReason = InvalidReason.NAME_MISMATCH;
     }

@@ -17,6 +17,8 @@ export default class Renderer {
     this.applyCamera(state.camera);
     this.drawZones(state.zones, state.activeZoneId);
     this.drawInteractionArea(state.interactionArea, state.canInspect);
+    this.drawCheckpoints(state.checkpoints);
+    this.drawPassengers(state.activePassengers);
     if (state.debugQueue) {
       this.drawQueueSlots(state.queueSlots);
       this.drawQueuePassengers(state.queueSlots);
@@ -103,6 +105,68 @@ export default class Renderer {
     ctx.fillStyle = ctx.strokeStyle;
     ctx.font = '13px "Segoe UI", sans-serif';
     ctx.fillText(canInspect ? 'Puedes inspeccionar' : 'Acércate al puesto', area.x + 8, area.y + 18);
+    ctx.restore();
+  }
+
+  drawCheckpoints(checkpoints = []) {
+    if (!checkpoints?.length) return;
+    const { ctx } = this;
+    ctx.save();
+    checkpoints.forEach((cp, index) => {
+      const enabled = cp.enabled !== false;
+      ctx.fillStyle = enabled ? '#3f88c5' : '#e26d5c';
+      ctx.strokeStyle = enabled ? '#e8f0f7' : '#e26d5c';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cp.x, cp.y, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = enabled ? '#e8f0f7' : '#ffdede';
+      ctx.font = '12px "Segoe UI", sans-serif';
+      ctx.fillText(`#${index} ${cp.name}`, cp.x + 14, cp.y + 4);
+    });
+    ctx.restore();
+  }
+
+  drawPassengers(passengers = []) {
+    if (!passengers?.length) return;
+    const { ctx } = this;
+    ctx.save();
+    passengers.forEach((p) => {
+      const size = 12;
+      let fill = '#f6a821';
+      let stroke = '#f4d35e';
+      if (p.prioridad === 1) {
+        fill = '#ffd700';
+        stroke = '#ffe680';
+      } else if (p.prioridad === 2) {
+        fill = '#c0c0c0';
+        stroke = '#e0e0e0';
+      } else if (p.prioridad === 3) {
+        fill = '#cd7f32';
+        stroke = '#e1a267';
+      } else if (p.prioridad !== null) {
+        fill = '#6c7a89';
+        stroke = '#9aa7b5';
+      }
+
+      // Override borde según decisión/validez
+      if (p.decision === 'ACCEPTED') {
+        stroke = p.isValid ? '#44bba4' : '#e26d5c';
+      }
+
+      ctx.fillStyle = fill;
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = 2;
+      ctx.fillRect(p.position.x - size / 2, p.position.y - size / 2, size, size);
+      ctx.strokeRect(p.position.x - size / 2, p.position.y - size / 2, size, size);
+
+      ctx.fillStyle = '#e8f0f7';
+      ctx.font = '11px \"Segoe UI\", sans-serif';
+      const label = p.prioridad ? `P${p.id} • ${p.prioridad}` : `P${p.id}`;
+      ctx.fillText(label, p.position.x + size, p.position.y);
+    });
     ctx.restore();
   }
 
